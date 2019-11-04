@@ -15,7 +15,28 @@ class Trie:
                 }
     def findAll(self, target):
         target = target.lower()
-        pass
+        node = self.root
+        for index, c in enumerate(target):
+            node = node.children[self.map[c]]
+            if node == None:
+                return []
+            if index == len(target) - 1:
+                return self.getAllWords(node)
+
+    def getAllWords(self, node):
+        l = []
+        stack = []
+        visited = set()
+        stack.append(node)
+        while len(stack) > 0:
+            node = stack.pop()
+            visited.add(node)
+            if node.word is not None:
+                l.append(node.word)
+            for n in node.children.keys():
+                if node.children[n] != None and node.children[n] not in visited:
+                    stack.append(node.children[n])
+        return l
 
     def insert(self, word):
         if word is not None:
@@ -25,6 +46,13 @@ class Trie:
             if node.children[self.map[c]] == None:
                 node.children[self.map[c]] = Node(None)
             if index == len(word) - 1:
+                '''
+                #can make code much faster and use less memory by using a list to store the words where they would usually be stored in the pound symbol, so 
+                #cat is inserted and then bat but bat would be stored at b(2) a(2) t(8)'s list 
+                #to use this version, uncomment out the line below and make node class's children[10] be an empty list
+                node.children[self.map['#']].append(word)
+                '''
+                # this code is for the more memory wasting and slower version as specified in the assignment .pdf
                 while node.word != None:
                     if node.children[self.map['#']] == None:
                         node.children[self.map['#']] = Node(None)
@@ -33,24 +61,13 @@ class Trie:
                         return
                     node = node.children[self.map['#']]
                 node.word = word
-                print('inserted ' + word)
-                #return
+                return
             node = node.children[self.map[c]]  
             
     def printTrie(self):
-        l = []
-        stack = []
-        visited = set()
-        stack.append(self.root)
-        while len(stack) > 0:
-            node = stack.pop()
-            visited.add(node)
-            if node.word is not None:
-                l.append(node.word)
-            for n in node.children.keys():
-                if node.children[n] != None and node.children[n] not in visited:
-                    stack.append(node.children[n])
+        l = self.getAllWords(self.root)
         print(l)
+        print("number of words: " + str(len(l)))
 
     def addWords(self, textFile):
         file1 = open(textFile, "r") 
